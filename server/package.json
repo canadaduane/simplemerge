@@ -1,0 +1,9 @@
+{
+  "name": "simplemerge-server",
+  "version": "1.0.0",
+  "description": "Automerge simple server",
+  "main": "index.js",
+  "repository": "https://github.com/canadaduane/simplemerge",
+  "author": "Duane Johnson",
+  "license": "MIT"
+}
