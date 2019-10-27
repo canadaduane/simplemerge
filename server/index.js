@@ -1,8 +1,11 @@
-const WebSocket = require('ws');
-const Connection = require('./connection')
-const Automerge = require('automerge')
+import WebSocket from 'ws'
+import Automerge from 'automerge'
  
-const wss = new WebSocket.Server({ port: 8080 })
+import Connection from '../common/connection'
+
+const port = 8080
+const wss = new WebSocket.Server({ port })
+console.log(`Simplemerge WebSocket listening on port ${port}...`)
 
 const actorId = 'server'
 
@@ -18,13 +21,10 @@ wss.on('connection', ws => {
   // All peers get access to the "connections" doc
   docSet.setDoc('connections', connectionsDoc)
 
-  const automerge = new Automerge.Connection(docSet, msg => {
-    console.log('sent', msg)
-    ws.send(JSON.stringify(msg))
-  })
-
-  ws.on('message', message => {
-    automerge.receiveMsg(message)
-    console.log('received', message)
+  const conn = new Connection(Automerge, docSet, ws)
+  // ws.on('message', conn.receiveMsg)
+  ws.on('message', msg => {
+    console.log('received', msg)
+    conn.receiveMsg(msg)
   })
 })

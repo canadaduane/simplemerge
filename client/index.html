@@ -2,21 +2,7 @@
 <html>
 <head>
   <title>Simplemerge</title>
-  <script>
-  // Create WebSocket connection.
-  const socket = new WebSocket('ws://localhost:8080');
-
-  // Connection opened
-  socket.addEventListener('open', function (event) {
-    socket.send("Hello Server!\nOk");
-  });
-
-  // Listen for messages
-  socket.addEventListener('message', function (event) {
-    const envelope = JSON.parse(event.data);
-    console.log('envelope', envelope);
-  });
-  </script>
+  <script src="./index.js"></script>
 </head>
 <body>
   Hi

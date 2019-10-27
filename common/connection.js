@@ -1,20 +1,29 @@
-const Automerge = require('automerge')
+// import Automerge from 'automerge'
 
 class Connection {
-  constructor (docSet, ws) {
+  constructor (Automerge, docSet, ws) {
     this.ws = ws
     this.automerge = new Automerge.Connection(docSet, msg => this.sendMsg(msg))
     this.automerge.open()
   }
 
-  receiveData (data) {
-    const msg = JSON.parse(data)
+  receiveMsg (msgString) {
+    let msg
+    try {
+      msg = JSON.parse(msgString)
+    } catch (e) {
+      console.error(e)
+      return false
+    }
     this.automerge.receiveMsg(msg)
+    return true
   }
 
   sendMsg (msg) {
     if (!this.ws) return
-    this.ws.send(msg)
+    console.log("sendMsg", msg)
+    const msgString = JSON.stringify(msg)
+    this.ws.send(msgString)
   }
 
   close () {

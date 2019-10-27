@@ -7,9 +7,12 @@
   "author": "Duane Johnson",
   "license": "MIT",
   "scripts": {
-    "start": "http-server"
+    "start": "parcel index.html"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
   },
   "dependencies": {
-    "http-server": "^0.11.1"
+    "automerge": "^0.12.1"
   }
 }

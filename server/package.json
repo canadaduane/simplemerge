@@ -6,8 +6,14 @@
   "repository": "https://github.com/canadaduane/simplemerge",
   "author": "Duane Johnson",
   "license": "MIT",
+  "scripts": {
+    "start": "parcel build -t node index.js && node dist/index.js"
+  },
   "dependencies": {
     "automerge": "^0.12.1",
     "ws": "^7.1.2"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
   }
 }
