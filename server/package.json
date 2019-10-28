@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "automerge": "^0.12.1",
+    "uuid": "^3.3.3",
     "ws": "^7.1.2"
   },
   "devDependencies": {
