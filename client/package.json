@@ -9,10 +9,13 @@
   "scripts": {
     "start": "parcel index.html"
   },
-  "devDependencies": {
-    "parcel-bundler": "^1.12.4"
-  },
   "dependencies": {
-    "automerge": "^0.12.1"
+    "automerge": "^0.12.1",
+    "react": "^16.0.0",
+    "react-dom": "^16.11.0"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "standard": "^14.3.1"
   }
 }

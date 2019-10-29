@@ -21,7 +21,6 @@ class Connection {
 
   sendMsg (msg) {
     if (!this.ws) return
-    console.log("sendMsg", msg)
     const msgString = JSON.stringify(msg)
     this.ws.send(msgString)
   }
