@@ -15,6 +15,7 @@ class Connection {
       console.error(e)
       return false
     }
+    console.log(msg)
     this.automerge.receiveMsg(msg)
     return true
   }
