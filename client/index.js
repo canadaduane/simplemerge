@@ -1,43 +1,11 @@
-import Automerge from 'automerge'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import Automerge from 'automerge'
 
-import Connection from '../common/connection'
+import connect from './connect'
 
 let ws
-let conn
 const docSet = new Automerge.DocSet()
-
-const incrementExampleCounter = () => {
-  let doc = docSet.getDoc('example')
-  if (doc) {
-    doc = Automerge.change(doc, doc => { doc.counter = doc.counter + 1 })
-  } else {
-    doc = Automerge.change(Automerge.init(), doc => { doc.counter = 0 })
-  }
-  docSet.setDoc('example', doc)
-}
-
-function connect (docSet) {
-  ws = new window.WebSocket('ws://localhost:8080')
-
-  ws.addEventListener('open', event => {
-    console.log('opened websocket', event)
-    conn = new Connection(Automerge, docSet, ws)
-  })
-
-  ws.addEventListener('close', event => {
-    if (conn) conn.close()
-    ws = null
-    conn = null
-    console.log('closed websocket', event)
-  })
-
-  // Listen for messages
-  ws.addEventListener('message', event => {
-    if (conn) conn.receiveMsg(event.data)
-  })
-}
 
 /**
  * Regularly check if the websocket connection has been lost, and reconnect if necessary
@@ -45,19 +13,36 @@ function connect (docSet) {
 setInterval(() => {
   if (!ws || ws.readyState === window.WebSocket.CLOSED) {
     console.log('attempting to re-establish socket connection...')
-    connect(docSet)
+    ws = connect('localhost', 8080, docSet)
   }
-}, 2500)
+}, 500)
 
 class App extends React.Component {
+  constructor () {
+    super()
+    this.handleChange = this.handleChange.bind(this)
+    this.handleAddOne = this.handleAddOne.bind(this)
+  }
+
   componentDidMount () {
-    this.props.docSet.registerHandler(this.handleChange.bind(this))
+    this.props.docSet.registerHandler(this.handleChange)
   }
 
   handleChange (docId, doc) {
     this.setState({
       [docId]: doc
     })
+  }
+
+  handleAddOne () {
+    const docSet = this.props.docSet
+    let doc = docSet.getDoc('example')
+    if (doc) {
+      doc = Automerge.change(doc, doc => { doc.counter = doc.counter + 1 })
+    } else {
+      doc = Automerge.change(Automerge.init(), doc => { doc.counter = 0 })
+    }
+    docSet.setDoc('example', doc)
   }
 
   render () {
@@ -69,7 +54,7 @@ class App extends React.Component {
           Count: {example.counter}
         </div>
         <div>
-          <button onClick={incrementExampleCounter}>Add One</button>
+          <button onClick={this.handleAddOne}>Add One</button>
         </div>
       </div>
     )

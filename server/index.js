@@ -1,7 +1,7 @@
-import { startFromGenesis } from './genesis'
+import { startFromGenesisDoc } from './genesis'
 import serve from './serve'
 
-const connectionsDoc = startFromGenesis('genesis.json')
+const connectionsDoc = startFromGenesisDoc('genesis.json')
 const port = 8080
 
 serve(port, connectionsDoc).on('listening', (event) => {

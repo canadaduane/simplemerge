@@ -1,30 +1,30 @@
 import Automerge from 'automerge'
 import fs from 'fs'
 
-const makeGenesis = (genesisFile) => {
+const makeGenesisDoc = (genesisFile) => {
   const genDoc = Automerge.change(Automerge.init(), doc => { doc.peers = [] })
   fs.writeFileSync(genesisFile, Automerge.save(genDoc))
   return genDoc
 }
 
-const loadGenesis = (genesisFile) => {
+const loadGenesisDoc = (genesisFile) => {
   return Automerge.load(fs.readFileSync(genesisFile))
 }
 
-const startFromGenesis = (genesisFile) => {
+const startFromGenesisDoc = (genesisFile) => {
   let connectionsDoc
 
   try {
-    connectionsDoc = loadGenesis(genesisFile)
+    connectionsDoc = loadGenesisDoc(genesisFile)
   } catch (e) {
-    connectionsDoc = makeGenesis(genesisFile)
+    connectionsDoc = makeGenesisDoc(genesisFile)
   }
 
   return connectionsDoc
 }
 
 module.exports = {
-  startFromGenesis,
-  makeGenesis,
-  loadGenesis
+  startFromGenesisDoc,
+  makeGenesisDoc,
+  loadGenesisDoc
 }
