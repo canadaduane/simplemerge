@@ -1,6 +1,6 @@
 node_modules/
-client/.cache/
 client/dist/
-server/.cache/
 server/dist/
+tests/dist/
+.cache/
 yarn.lock

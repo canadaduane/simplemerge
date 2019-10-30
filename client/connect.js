@@ -1,20 +1,22 @@
 import Automerge from 'automerge'
+import WebSocket from 'isomorphic-ws'
+
 import Connection from '../common/connection'
 
 function connect (host, port, docSet) {
-  let ws = new window.WebSocket('ws://' + host + ':' + port)
+  let ws = new WebSocket('ws://' + host + ':' + port)
   let conn
 
   ws.addEventListener('open', event => {
     conn = new Connection(Automerge, docSet, ws)
-    console.log('opened websocket', event)
+    console.log('opened client websocket')
   })
 
   ws.addEventListener('close', event => {
     if (conn) conn.close()
     ws = null
     conn = null
-    console.log('closed websocket', event)
+    console.log('closed client websocket')
   })
 
   // Listen for messages
