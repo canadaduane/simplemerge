@@ -15,7 +15,7 @@ setInterval(() => {
     console.log('attempting to re-establish socket connection...')
     ws = connect('localhost', 8080, docSet)
   }
-}, 500)
+}, 1000)
 
 class App extends React.Component {
   constructor () {

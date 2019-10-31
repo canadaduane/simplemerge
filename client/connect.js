@@ -1,4 +1,3 @@
-import Automerge from 'automerge'
 import WebSocket from 'isomorphic-ws'
 
 import Connection from '../common/connection'
@@ -8,7 +7,7 @@ function connect (host, port, docSet) {
   let conn
 
   ws.addEventListener('open', event => {
-    conn = new Connection(Automerge, docSet, ws)
+    conn = new Connection(docSet, ws)
     console.log('opened client websocket')
   })
 
@@ -21,6 +20,7 @@ function connect (host, port, docSet) {
 
   // Listen for messages
   ws.addEventListener('message', event => {
+    console.log('message', event.data)
     if (conn) conn.receiveMsg(event.data)
   })
 

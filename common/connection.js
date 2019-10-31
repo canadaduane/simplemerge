@@ -1,7 +1,7 @@
-// import Automerge from 'automerge'
+import Automerge from 'automerge'
 
 class Connection {
-  constructor (Automerge, docSet, ws) {
+  constructor (docSet, ws) {
     this.ws = ws
     this.automerge = new Automerge.Connection(docSet, msg => this.sendMsg(msg))
     this.automerge.open()
