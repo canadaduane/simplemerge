@@ -1,59 +1,100 @@
 import Automerge from 'automerge'
 import Server from '../server/Server'
-import connect from '../client/connect'
+import { startFromGenesisDoc } from '../server/genesis'
+import Client from '../client/Client'
+import delay from '../common/delay'
 
-const testReconnectServer = () => {
-  let connDoc = Automerge.change(Automerge.init(), doc => { doc.peers = [] })
+/**
+ * Failure sequence:
+ * 1. start the server
+ * 2. start the client & connect
+ * 3. stop the server
+ * 4. start the server
+ * 5. let client and server sync
+ * 6. restart the client
+ * 7. let client and server sync
+ * 8. BOOM server dies "RangeError: Cannot pass an old state object to a connection"
+ */
 
-  console.log('Setting up server (instance-1)...')
+const addOne = (docSet) => {
+  let doc = docSet.getDoc('example')
+  if (doc) {
+    doc = Automerge.change(doc, doc => { doc.counter = doc.counter + 1 })
+  } else {
+    doc = Automerge.change(Automerge.init(), doc => { doc.counter = 0 })
+  }
+  docSet.setDoc('example', doc)
+}
+
+const testReconnectServer = async () => {
+  const connDoc = startFromGenesisDoc('genesis.json')
+  // const connDoc = Automerge.change(Automerge.init(), doc => { doc.peers = [] })
+
   const port = 8089
 
-  // Set up server
-  let server = new Server(connDoc)
-  server.listen(port).on('listening', _ev1 => {
-
-    console.log('Connecting client...')
-    let clientDocSet = new Automerge.DocSet()
-    let wsClient = connect('localhost', port, clientDocSet)
-
-    const increment = () => {
-      let doc = clientDocSet.getDoc('example')
-      if (doc) {
-        doc = Automerge.change(doc, doc => { doc.counter = doc.counter + 1 })
-      } else {
-        doc = Automerge.change(Automerge.init(), doc => { doc.counter = 0 })
-      }
-      clientDocSet.setDoc('example', doc)
-    }
-
-    wsClient.addEventListener('open', _ev2 => {
-      console.log('Client incrementing counter')
-      increment()
-      increment()
-
-      wsServer.on('close', _ev3 => {
-        console.log('Server shut down. Restarting...')
-        let connDoc2 = Automerge.change(Automerge.init(), doc => { doc.peers = [] })
-        let [wsServer2, serverDocSet2] = listen(port, connDoc2)
-        wsServer2.on('listening', _ev4 => {
-          console.log('Reconnecting client...')
-          wsClient = connect('localhost', port, clientDocSet)
-
-          wsClient.addEventListener('open', _ev5 => {
-            setTimeout(() => {
-              console.log('Shutting server down...')
-              wsServer2.close()
-            }, 500)
-          })
-        })
-      })
-
-      setTimeout(() => {
-        console.log('Shutting server down...')
-        wsServer.close()
-      }, 500)
-    })
+  console.log('Setting up server...')
+  const server = new Server({
+    port,
+    connectionsDoc: connDoc
   })
+
+  await server.listen()
+
+  console.log('Connecting client...')
+  const client1 = new Client({
+    host: 'localhost',
+    port
+  })
+  addOne(client1.docSet)
+  await client1.connect()
+  await delay(500)
+
+  const client2 = new Client({
+    host: 'localhost',
+    port
+  })
+  await client2.connect()
+  addOne(client2.docSet)
+  await delay(500)
+
+  console.log('Reconnecting client1...')
+  await client1.disconnect()
+  await client1.connect()
+  addOne(client1.docSet)
+  await delay(500)
+
+  console.log('Reconnecting client1...')
+  await client2.disconnect()
+  await client2.connect()
+  addOne(client2.docSet)
+  await delay(500)
+
+  console.log('Restarting server...')
+  await server.close()
+  await server.listen()
+
+  await delay(200)
+  await client1.connect()
+  await client2.connect()
+  addOne(client2.docSet)
+
+  await delay(500)
+
+  await server.close()
+  await server.listen()
+
+  await client1.connect()
+  await client2.connect()
+  addOne(client1.docSet)
+
+  await delay(1000)
+  console.log('Restarting server...')
+  await server.close()
+  await server.listen()
+  await delay(200)
+  await client1.connect()
+  await client2.connect()
+  // 8. BOOM?
 }
 
 module.exports = {

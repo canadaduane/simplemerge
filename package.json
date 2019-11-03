@@ -9,7 +9,7 @@
   "scripts": {
     "start": "yon run server & yon run client-dev & wait",
     "client-build": "parcel build -d client/dist/ client/index.html",
-    "client-dev": "parcel client/index.html",
+    "client": "parcel client/index.html",
     "server-build": "parcel build -d server/dist/ -t node server/index.js",
     "server": "yon run server-build && node server/dist/index.js",
     "test": "parcel build -d tests/dist/ -t node tests/index.js && node tests/dist/index.js"
@@ -19,6 +19,7 @@
     "isomorphic-ws": "^4.0.1",
     "react": "^16.0.0",
     "react-dom": "^16.11.0",
+    "regenerator-runtime": "^0.13.3",
     "uuid": "^3.3.3",
     "ws": "^7.2.0"
   },

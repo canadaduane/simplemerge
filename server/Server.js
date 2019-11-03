@@ -5,17 +5,27 @@ import uuid from 'uuid/v4'
 import Connection from '../common/connection'
 
 class Server {
-  constructor (connectionsDoc) {
-    this.connectionsDoc = connectionsDoc
+  constructor ({ port, connectionsDoc, onConnect }) {
+    this.port = port || 8080
+    this.connectionsDoc = connectionsDoc || Automerge.init()
+    this.onConnect = onConnect || (() => {})
   }
 
-  listen (port) {
-    this.server = new WebSocket.Server({ port })
+  async listen () {
+    this.server = new WebSocket.Server({ port: this.port })
     this.docSet = new Automerge.DocSet()
 
     this.server.on('connection', this.handleConnection.bind(this))
-    
-    return this.server
+
+    return new Promise((resolve, reject) => {
+      this.server.on('listening', resolve)
+    })
+  }
+
+  async close () {
+    return new Promise((resolve, reject) => {
+      this.server.close(resolve)
+    })
   }
 
   handleConnection (websocket) {
@@ -29,6 +39,8 @@ class Server {
     websocket.on('message', msg => {
       this.connection.receiveMsg(msg)
     })
+
+    this.onConnect()
   }
 }
 

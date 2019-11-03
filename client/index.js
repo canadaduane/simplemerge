@@ -1,21 +1,10 @@
+import 'regenerator-runtime/runtime'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Automerge from 'automerge'
 
-import connect from './connect'
-
-let ws
-const docSet = new Automerge.DocSet()
-
-/**
- * Regularly check if the websocket connection has been lost, and reconnect if necessary
- */
-setInterval(() => {
-  if (!ws || ws.readyState === window.WebSocket.CLOSED) {
-    console.log('attempting to re-establish socket connection...')
-    ws = connect('localhost', 8080, docSet)
-  }
-}, 1000)
+import delay from '../common/delay'
+import Client from './Client'
 
 class App extends React.Component {
   constructor () {
@@ -61,4 +50,28 @@ class App extends React.Component {
   }
 }
 
-ReactDOM.render(<App docSet={docSet} />, document.getElementById('root'))
+const start = async () => {
+  const client = new Client({
+    host: 'localhost',
+    port: 8080
+  })
+
+  ReactDOM.render(
+    <App docSet={client.docSet} />,
+    document.getElementById('root')
+  )
+
+  while (true) {
+    console.log('checking connection...')
+    if (!client.isConnected()) {
+      try {
+        await client.connect()
+      } catch (e) {
+        // it's ok
+      }
+    }
+    await delay(500)
+  }
+}
+
+start()
