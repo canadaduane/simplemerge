@@ -14,6 +14,15 @@ import delay from '../common/delay'
  * 6. restart the client
  * 7. let client and server sync
  * 8. BOOM server dies "RangeError: Cannot pass an old state object to a connection"
+ * 
+ * New failure seq:
+ * 1. start server
+ * 2. start client1
+ * 3. inc client1
+ * 4. start client2
+ * 5. inc client2
+ * 6. restart client1
+ * 7. restart server
  */
 
 const addOne = (docSet) => {
@@ -40,8 +49,8 @@ const testReconnectServer = async () => {
 
   await server.listen()
 
-  console.log('Connecting client...')
-  const client1 = new Client({
+  console.log('Connecting client1...')
+  let client1 = new Client({
     host: 'localhost',
     port
   })
@@ -49,49 +58,28 @@ const testReconnectServer = async () => {
   await client1.connect()
   await delay(500)
 
-  const client2 = new Client({
+  console.log('Connecting client2...')
+  let client2 = new Client({
     host: 'localhost',
     port
   })
-  await client2.connect()
   addOne(client2.docSet)
+  await client2.connect()
   await delay(500)
 
-  console.log('Reconnecting client1...')
-  await client1.disconnect()
+  client1.disconnect()
+  console.log('Restart client1')
+  client1 = new Client({
+    host: 'localhost',
+    port
+  })
   await client1.connect()
-  addOne(client1.docSet)
   await delay(500)
 
-  console.log('Reconnecting client1...')
-  await client2.disconnect()
-  await client2.connect()
-  addOne(client2.docSet)
-  await delay(500)
-
-  console.log('Restarting server...')
+  console.log('Restart server...')
   await server.close()
   await server.listen()
-
-  await delay(200)
-  await client1.connect()
-  await client2.connect()
-  addOne(client2.docSet)
-
-  await delay(500)
-
-  await server.close()
-  await server.listen()
-
-  await client1.connect()
-  await client2.connect()
-  addOne(client1.docSet)
-
-  await delay(1000)
-  console.log('Restarting server...')
-  await server.close()
-  await server.listen()
-  await delay(200)
+  
   await client1.connect()
   await client2.connect()
   // 8. BOOM?
