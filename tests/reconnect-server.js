@@ -6,21 +6,10 @@ import delay from '../common/delay'
 
 /**
  * Failure sequence:
- * 1. start the server
- * 2. start the client & connect
- * 3. stop the server
- * 4. start the server
- * 5. let client and server sync
- * 6. restart the client
- * 7. let client and server sync
- * 8. BOOM server dies "RangeError: Cannot pass an old state object to a connection"
- * 
- * New failure seq:
  * 1. start server
  * 2. start client1
  * 3. inc client1
  * 4. start client2
- * 5. inc client2
  * 6. restart client1
  * 7. restart server
  */
@@ -37,7 +26,6 @@ const addOne = (docSet) => {
 
 const testReconnectServer = async () => {
   const connDoc = startFromGenesisDoc('genesis.json')
-  // const connDoc = Automerge.change(Automerge.init(), doc => { doc.peers = [] })
 
   const port = 8089
 
