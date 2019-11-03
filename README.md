@@ -6,13 +6,18 @@ One of the issues for newcomers to Automerge is the lack of familiarity with the
 
 While automerge offers many other possible configurations (e.g. peer-to-peer, federated, server-to-server, multi-master-write etc.) I felt it needed a simple example of a familiar topology to get people started. `simplemerge` is that example.
 
+## Setup
+
+```
+$ yarn install
+```
+
 ## Server
 
 The server runs a websocket, listening for connections on port 8080:
 
 ```
-$ yarn install
-$ yarn start
+$ yarn run server
 ```
 
 The server holds a single `connections` document that tracks new peers as they connect to the server. Each peer is given access to this `connections` document so that peers can become aware of each other and start to communicate.
@@ -24,8 +29,7 @@ The server also syncs any documents that any of its clients offers up--so if a c
 The client is a static HTML page with javascript. It uses `parcel` as a web packager, and can be started in the same way as the server:
 
 ```
-$ yarn install
-$ yarn start
+$ yarn run client
 ```
 
 Once started, open it up at [http://localhost:1234](http://localhost:1234).
