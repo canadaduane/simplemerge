@@ -7,14 +7,13 @@ import Connection from '../common/connection'
 class Server {
   constructor ({ port, connectionsDoc, onConnect }) {
     this.port = port || 8080
-    this.connectionsDoc = connectionsDoc || Automerge.init()
     this.onConnect = onConnect || (() => {})
+    this.docSet = new Automerge.DocSet()
+    this.docSet.setDoc('connections', connectionsDoc || Automerge.init())
   }
 
   async listen () {
     this.server = new WebSocket.Server({ port: this.port })
-    this.docSet = new Automerge.DocSet()
-
     this.server.on('connection', this.handleConnection.bind(this))
 
     return new Promise((resolve, reject) => {
@@ -33,8 +32,9 @@ class Server {
 
     // Whenever a peer connects, we add it to the list, and every peer gets updated
     websocket.id = uuid()
-    this.connectionsDoc = Automerge.change(this.connectionsDoc, doc => doc.peers.push(websocket.id))
-    this.docSet.setDoc('connections', this.connectionsDoc)
+    let connectionsDoc = this.docSet.getDoc('connections')
+    connectionsDoc = Automerge.change(connectionsDoc, doc => doc.peers.push(websocket.id))
+    this.docSet.setDoc('connections', connectionsDoc)
 
     websocket.on('message', msg => {
       this.connection.receiveMsg(msg)
