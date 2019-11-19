@@ -8,7 +8,7 @@ const makeGenesisDoc = (genesisFile) => {
 }
 
 const loadGenesisDoc = (genesisFile) => {
-  return Automerge.load(fs.readFileSync(genesisFile), 'a32dccb3-6113-499e-a25b-2433bc838ff5')
+  return Automerge.load(fs.readFileSync(genesisFile))
 }
 
 const startFromGenesisDoc = (genesisFile) => {
